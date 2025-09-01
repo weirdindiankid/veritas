@@ -1,5 +1,10 @@
 # Veritas - Defending Digital Truth Through Transparency
 
+[![CI](https://github.com/weirdindiankid/veritas/workflows/CI/badge.svg)](https://github.com/weirdindiankid/veritas/actions)
+[![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](LICENSE)
+[![Ruby Version](https://img.shields.io/badge/ruby-3.3.5-red.svg)](https://ruby-lang.org)
+[![Rails Version](https://img.shields.io/badge/rails-7.2.2-red.svg)](https://rubyonrails.org)
+
 **An open-source initiative to archive and verify corporate terms of service, ensuring companies can't silently rewrite history.**
 
 ## 🎯 The Problem
@@ -58,6 +63,41 @@ We need contributors from all backgrounds! Here's how you can make a difference:
 
 ## 🌟 Getting Started
 
+### Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/weirdindiankid/veritas.git
+   cd veritas
+   ```
+
+2. **Install dependencies**
+   ```bash
+   bundle install
+   ```
+
+3. **Setup database**
+   ```bash
+   rails db:create db:migrate
+   ```
+
+4. **Start the development server**
+   ```bash
+   bin/dev  # Starts Rails server + Tailwind watcher
+   # OR separately:
+   rails server
+   rails tailwindcss:watch
+   ```
+
+5. **Run tests**
+   ```bash
+   bundle exec rspec
+   ```
+
+6. **Visit the application**
+   - Open http://localhost:3000
+   - Click "Archive a Company" to start adding companies
+
 ### Contributing
 
 1. **Star this repo** - Help us gain visibility
@@ -85,24 +125,27 @@ We're actively working on:
 
 ## 🗺️ Roadmap
 
-### Phase 1: Foundation (Current)
-- [ ] Core archiving infrastructure
-- [ ] IPFS integration
-- [ ] Basic web interface
-- [ ] Initial scraper suite
+### Phase 1: Foundation ✅ COMPLETED
+- [x] Core archiving infrastructure (Rails + PostgreSQL + IPFS)
+- [x] IPFS integration with content addressing and pinning
+- [x] Basic web interface with modern UI/UX
+- [x] Initial scraper suite for ToS and Privacy Policy documents
+- [x] Database models for Companies, Documents, and Archives
+- [x] Automatic document archiving on company creation
+- [x] Cryptographic verification with SHA-256 checksums
 
-### Phase 2: Intelligence
-- [ ] Automated change detection
-- [ ] Diff visualization
+### Phase 2: Intelligence (In Progress)
+- [ ] Automated change detection with scheduled jobs
+- [ ] Diff visualization between document versions
 - [ ] Legal clause classification
-- [ ] API v1 release
+- [x] API v1 endpoints (partially implemented)
 
 ### Phase 3: Impact
-- [ ] Browser extension
-- [ ] Mobile apps
-- [ ] Legal tool integrations
-- [ ] Public alerting system
-- [ ] Academic partnerships
+- [ ] Browser extension for one-click archiving
+- [ ] Mobile-responsive interface enhancements
+- [ ] Legal tool integrations and export formats
+- [ ] Public alerting system for policy changes
+- [ ] Academic partnerships and research tools
 
 ## 💡 Use Cases
 

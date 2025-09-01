@@ -1,0 +1,88 @@
+class DocumentArchiverService
+  def initialize(company)
+    @company = company
+    @errors = []
+  end
+
+  def archive_all
+    results = []
+    
+    # Archive Terms of Service
+    if @company.terms_url.present?
+      result = archive_document(@company.terms_url, 'Terms of Service')
+      results << result
+    end
+    
+    # Archive Privacy Policy  
+    if @company.privacy_url.present?
+      result = archive_document(@company.privacy_url, 'Privacy Policy')
+      results << result
+    end
+    
+    {
+      success: results.any? { |r| r[:success] },
+      results: results,
+      errors: @errors
+    }
+  end
+  
+  private
+  
+  def archive_document(url, document_type)
+    begin
+      # Scrape the document
+      scrape_result = ScraperService.scrape_url(url)
+      
+      unless scrape_result[:success]
+        error_msg = "Failed to scrape #{document_type}: #{scrape_result[:error]}"
+        @errors << error_msg
+        return { success: false, error: error_msg, document_type: document_type }
+      end
+      
+      # Store in IPFS
+      ipfs_result = IpfsService.store_document(
+        scrape_result[:text],
+        "#{@company.domain}_#{document_type.downcase.gsub(' ', '_')}_#{Time.current.to_i}.txt"
+      )
+      
+      unless ipfs_result[:success]
+        error_msg = "Failed to store #{document_type} in IPFS: #{ipfs_result[:error]}"
+        @errors << error_msg
+        return { success: false, error: error_msg, document_type: document_type }
+      end
+      
+      # Create document record
+      document = @company.documents.build(
+        url: url,
+        title: "#{@company.name} #{document_type}",
+        content: scrape_result[:text],
+        ipfs_hash: ipfs_result[:hash],
+        archived_at: Time.current
+      )
+      
+      if document.save
+        # Pin to IPFS for persistence
+        IpfsService.pin_document(ipfs_result[:hash])
+        
+        {
+          success: true,
+          document: document,
+          document_type: document_type,
+          ipfs_hash: ipfs_result[:hash],
+          scraped_content_length: scrape_result[:text]&.length || 0
+        }
+      else
+        error_msg = "Failed to save #{document_type}: #{document.errors.full_messages.join(', ')}"
+        @errors << error_msg
+        { success: false, error: error_msg, document_type: document_type }
+      end
+      
+    rescue => e
+      error_msg = "Unexpected error archiving #{document_type}: #{e.message}"
+      Rails.logger.error error_msg
+      Rails.logger.error e.backtrace.join("\n")
+      @errors << error_msg
+      { success: false, error: error_msg, document_type: document_type }
+    end
+  end
+end
