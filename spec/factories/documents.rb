@@ -6,11 +6,13 @@ FactoryBot.define do
     content { "This is the terms of service content. By using our service, you agree to these terms and conditions. We may update these terms at any time." }
     archived_at { Time.current }
     sequence(:ipfs_hash) { |n| "Qm#{SecureRandom.alphanumeric(44)}" } # Mock IPFS hash format
+    document_type { 'terms' }
     
     trait :privacy_policy do
       sequence(:url) { |n| "https://example#{n}.com/privacy" }
       sequence(:title) { |n| "Privacy Policy #{n}" }
       content { "This privacy policy describes how we collect, use, and protect your personal information." }
+      document_type { 'privacy' }
     end
     
     trait :old_document do
