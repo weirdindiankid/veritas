@@ -36,7 +36,7 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         status_code: 200,
         document_type: 'terms'
       }
-      
+
       privacy_response = {
         success: true,
         title: 'Privacy Policy - Example Corp',
@@ -48,7 +48,7 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         status_code: 200,
         document_type: 'privacy'
       }
-      
+
       allow(ScraperService).to receive(:scrape_url).with('https://example.com/terms').and_return(terms_response)
       allow(ScraperService).to receive(:scrape_url).with('https://example.com/privacy').and_return(privacy_response)
       allow_any_instance_of(IpfsService).to receive(:add).and_return('QmTestHash123')
@@ -56,27 +56,27 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
 
     it 'automatically scrapes and archives documents when company is created' do
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Example Corp'
       fill_in 'Domain', with: 'example.com'
       fill_in 'Terms of Service URL', with: 'https://example.com/terms'
       fill_in 'Privacy Policy URL', with: 'https://example.com/privacy'
-      
+
       click_button 'Archive Company'
-      
+
       expect(page).to have_content('Company created successfully!')
-      
+
       # Verify company was created
       company = Company.find_by(domain: 'example.com')
       expect(company).to be_present
-      
+
       # Verify documents were created
       expect(company.documents.count).to eq(2)
-      
+
       terms_doc = company.documents.find_by(document_type: 'terms')
       expect(terms_doc.title).to eq('Terms of Service - Example Corp')
       expect(terms_doc.content).to include('By using our service')
-      
+
       privacy_doc = company.documents.find_by(document_type: 'privacy')
       expect(privacy_doc.title).to eq('Privacy Policy - Example Corp')
       expect(privacy_doc.content).to include('We respect your privacy')
@@ -95,27 +95,27 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         status_code: 200,
         document_type: 'terms'
       })
-      
+
       allow(ScraperService).to receive(:scrape_url).with('https://example.com/privacy').and_return({
         success: false,
         error: 'HTTP 404: Not Found',
         status_code: 404
       })
-      
+
       allow_any_instance_of(IpfsService).to receive(:add).and_return('QmTestHash123')
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Partial Corp'
       fill_in 'Domain', with: 'partial.com'
       fill_in 'Terms of Service URL', with: 'https://example.com/terms'
       fill_in 'Privacy Policy URL', with: 'https://example.com/privacy'
-      
+
       click_button 'Archive Company'
-      
+
       expect(page).to have_content('Company created successfully!')
       expect(page).to have_content('Warning: Failed to archive privacy policy')
-      
+
       company = Company.find_by(domain: 'partial.com')
       expect(company.documents.count).to eq(1)
       expect(company.documents.first.document_type).to eq('terms')
@@ -127,18 +127,18 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         error: 'Connection timeout',
         status_code: nil
       })
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Failed Corp'
       fill_in 'Domain', with: 'failed.com'
       fill_in 'Terms of Service URL', with: 'https://failed.com/terms'
-      
+
       click_button 'Archive Company'
-      
+
       expect(page).to have_content('Company created but archiving failed')
       expect(page).to have_content('Connection timeout')
-      
+
       company = Company.find_by(domain: 'failed.com')
       expect(company).to be_present
       expect(company.documents.count).to eq(0)
@@ -148,7 +148,7 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
   describe 'Manual re-scraping of documents' do
     let(:company) { create(:company, terms_url: 'https://example.com/terms') }
     let!(:old_document) do
-      create(:document, 
+      create(:document,
         company: company,
         title: 'Old Terms',
         content: 'Old content',
@@ -168,23 +168,23 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         status_code: 200,
         document_type: 'terms'
       })
-      
+
       allow_any_instance_of(IpfsService).to receive(:add).and_return('QmNewHash456')
     end
 
     it 'allows manual re-archiving to capture updates' do
       visit company_path(company)
-      
+
       expect(page).to have_button('Re-archive Documents')
-      
+
       click_button 'Re-archive Documents'
-      
+
       expect(page).to have_content('Documents re-archived successfully')
       expect(page).to have_content('1 document(s) updated')
-      
+
       # Should create a new archive version
       expect(company.documents.count).to eq(2)
-      
+
       new_doc = company.documents.order(:created_at).last
       expect(new_doc.title).to eq('Updated Terms of Service')
       expect(new_doc.content).to eq('New updated terms content')
@@ -194,10 +194,10 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
       # Skip this test - archive versioning is complex and not critical for core functionality
       visit company_path(company)
       click_button 'Re-archive Documents'
-      
+
       new_doc = company.documents.order(:created_at).last
       archive = new_doc.archives.first
-      
+
       expect(archive).to be_present
       expect(archive.diff_content).to include('content changed')
       expect(archive.previous_archive).to be_present
@@ -221,17 +221,17 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
           document_type: 'terms'
         }
       end
-      
+
       allow_any_instance_of(IpfsService).to receive(:add).and_return('QmHash')
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Slow Corp'
       fill_in 'Domain', with: 'slow.com'
       fill_in 'Terms of Service URL', with: 'https://slow.com/terms'
-      
+
       click_button 'Archive Company'
-      
+
       # Should show some indication that archiving is in progress
       expect(page).to have_content('successfully')
     end
@@ -242,15 +242,15 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         error: 'SSL certificate verification failed',
         status_code: nil
       })
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'SSL Error Corp'
       fill_in 'Domain', with: 'sslerror.com'
       fill_in 'Terms of Service URL', with: 'https://sslerror.com/terms'
-      
+
       click_button 'Archive Company'
-      
+
       expect(page).to have_content('SSL certificate verification failed')
     end
 
@@ -260,15 +260,15 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         error: 'HTTP 429: Too Many Requests',
         status_code: 429
       })
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Rate Limited Corp'
       fill_in 'Domain', with: 'ratelimited.com'
       fill_in 'Terms of Service URL', with: 'https://ratelimited.com/terms'
-      
+
       click_button 'Archive Company'
-      
+
       expect(page).to have_content('Rate limited')
       expect(page).to have_content('Please try again later')
     end
@@ -287,22 +287,22 @@ RSpec.describe 'Web Scraping and Document Archiving', type: :system do
         status_code: 200,
         document_type: 'terms'
       })
-      
+
       allow_any_instance_of(IpfsService).to receive(:add).and_return('QmContentHash')
-      
+
       visit new_company_path
-      
+
       fill_in 'Name', with: 'Content Test Corp'
       fill_in 'Domain', with: 'content.com'
       fill_in 'Terms of Service URL', with: 'https://example.com/terms'
-      
+
       click_button 'Archive Company'
-      
+
       company = Company.find_by(domain: 'content.com')
       document = company.documents.first
-      
+
       visit document_path(document)
-      
+
       expect(page).to have_content('Terms of Service | Company Name')
       expect(page).to have_content('Section 1: Acceptance of Terms')
       expect(page).to have_content('By accessing and using this service')

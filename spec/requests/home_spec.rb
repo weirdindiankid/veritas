@@ -6,11 +6,11 @@ RSpec.describe "Home", type: :request do
       get root_path
       expect(response).to have_http_status(:success)
     end
-    
+
     it "displays homepage content" do
       get root_path
       expect(response.body).to include("Digital Truth Archive")
-      expect(response.body).to include("Veritas")
+      expect(response.body).to include("ArchiveRight")
     end
   end
 end

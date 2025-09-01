@@ -10,7 +10,7 @@ RSpec.describe Archive, type: :model do
     it 'requires a version' do
       archive = build(:archive)
       # Skip the callback and set version to nil directly
-      archive.define_singleton_method(:set_version) {}
+      archive.define_singleton_method(:set_version) { }
       archive.version = nil
       expect(archive).not_to be_valid
       expect(archive.errors[:version]).to include("can't be blank")
@@ -59,12 +59,12 @@ RSpec.describe Archive, type: :model do
 
   describe 'scopes' do
     let(:document) { create(:document) }
-    
+
     describe '.by_document' do
       it 'returns archives for a specific document' do
         archive1 = create(:archive, document: document)
         archive2 = create(:archive, document: create(:document))
-        
+
         result = Archive.by_document(document)
         expect(result).to include(archive1)
         expect(result).not_to include(archive2)
@@ -76,9 +76,9 @@ RSpec.describe Archive, type: :model do
         archive3 = create(:archive, document: document, version: 3)
         archive1 = create(:archive, document: document, version: 1)
         archive2 = create(:archive, document: document, version: 2)
-        
+
         result = Archive.ordered
-        expect(result.map(&:version)).to eq([1, 2, 3])
+        expect(result.map(&:version)).to eq([ 1, 2, 3 ])
       end
     end
   end
@@ -88,7 +88,7 @@ RSpec.describe Archive, type: :model do
       it 'automatically sets version to 1 for first archive' do
         document = create(:document)
         archive = build(:archive, document: document, version: nil)
-        
+
         expect { archive.save! }.to change { archive.version }.to(1)
       end
 
@@ -96,7 +96,7 @@ RSpec.describe Archive, type: :model do
         document = create(:document)
         create(:archive, document: document, version: 1)
         create(:archive, document: document, version: 2)
-        
+
         archive = build(:archive, document: document, version: nil)
         expect { archive.save! }.to change { archive.version }.to(3)
       end
@@ -104,7 +104,7 @@ RSpec.describe Archive, type: :model do
       it 'does not override manually set version' do
         document = create(:document)
         archive = build(:archive, document: document, version: 5)
-        
+
         expect { archive.save! }.not_to change { archive.version }
         expect(archive.version).to eq(5)
       end
@@ -130,11 +130,11 @@ RSpec.describe Archive, type: :model do
 
   describe '#next_archive' do
     let(:document) { create(:document) }
-    
+
     it 'returns the next version archive' do
       archive1 = create(:archive, document: document, version: 1)
       archive2 = create(:archive, document: document, version: 2)
-      
+
       expect(archive1.next_archive).to eq(archive2)
     end
 
@@ -146,7 +146,7 @@ RSpec.describe Archive, type: :model do
     it 'skips gaps in version numbers' do
       archive1 = create(:archive, document: document, version: 1)
       archive3 = create(:archive, document: document, version: 3)
-      
+
       expect(archive1.next_archive).to be_nil
     end
   end

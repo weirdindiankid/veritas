@@ -30,9 +30,9 @@ RSpec.describe "Companies", type: :request do
       allow(DocumentArchiverService).to receive(:new).and_return(archiver)
       allow(archiver).to receive(:archive_all).and_return({
         success: true,
-        results: [{ success: true, document_type: 'Terms of Service' }]
+        results: [ { success: true, document_type: 'Terms of Service' } ]
       })
-      
+
       company_params = {
         company: {
           name: "Test Company",
@@ -41,14 +41,14 @@ RSpec.describe "Companies", type: :request do
           description: "A test company"
         }
       }
-      
+
       expect {
         post companies_path, params: company_params
       }.to change(Company, :count).by(1)
-      
+
       expect(response).to have_http_status(:redirect)
     end
-    
+
     it "renders new template with invalid params" do
       company_params = {
         company: {
@@ -57,7 +57,7 @@ RSpec.describe "Companies", type: :request do
           terms_url: ""
         }
       }
-      
+
       post companies_path, params: company_params
       expect(response).to have_http_status(:unprocessable_entity)
     end

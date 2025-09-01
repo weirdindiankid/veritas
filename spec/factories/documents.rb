@@ -7,22 +7,22 @@ FactoryBot.define do
     archived_at { Time.current }
     sequence(:ipfs_hash) { |n| "Qm#{SecureRandom.alphanumeric(44)}" } # Mock IPFS hash format
     document_type { 'terms' }
-    
+
     trait :privacy_policy do
       sequence(:url) { |n| "https://example#{n}.com/privacy" }
       sequence(:title) { |n| "Privacy Policy #{n}" }
       content { "This privacy policy describes how we collect, use, and protect your personal information." }
       document_type { 'privacy' }
     end
-    
+
     trait :old_document do
       archived_at { 1.year.ago }
     end
-    
+
     trait :recent_document do
       archived_at { 1.hour.ago }
     end
-    
+
     trait :with_archives do
       after(:create) do |document|
         create_list(:archive, 2, document: document)

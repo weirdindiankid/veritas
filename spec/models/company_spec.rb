@@ -63,7 +63,7 @@ RSpec.describe Company, type: :model do
     it 'destroys associated documents when company is deleted' do
       company = create(:company)
       document = create(:document, company: company)
-      
+
       expect { company.destroy }.to change(Document, :count).by(-1)
     end
   end
@@ -73,7 +73,7 @@ RSpec.describe Company, type: :model do
       it 'returns companies with terms_url' do
         active_company = create(:company)
         inactive_company = create(:company, :inactive)
-        
+
         expect(Company.active).to include(active_company)
         expect(Company.active).not_to include(inactive_company)
       end

@@ -12,7 +12,7 @@ RSpec.describe ScraperService, type: :service do
   describe '#scrape' do
     let(:url) { 'https://example.com/terms' }
     let(:service) { ScraperService.new(url) }
-    
+
     context 'with successful response' do
       let(:html_content) do
         <<~HTML
@@ -27,7 +27,7 @@ RSpec.describe ScraperService, type: :service do
           </html>
         HTML
       end
-      
+
       before do
         stub_request(:get, url)
           .to_return(status: 200, body: html_content, headers: { 'Content-Type' => 'text/html' })
@@ -35,7 +35,7 @@ RSpec.describe ScraperService, type: :service do
 
       it 'returns successful result with extracted content' do
         result = service.scrape
-        
+
         expect(result[:success]).to be true
         expect(result[:title]).to eq('Terms of Service')
         expect(result[:text]).to include('These are our terms of service')
@@ -50,7 +50,7 @@ RSpec.describe ScraperService, type: :service do
       it 'generates consistent checksum for same content' do
         result1 = service.scrape
         result2 = service.scrape
-        
+
         expect(result1[:checksum]).to eq(result2[:checksum])
       end
     end
@@ -62,7 +62,7 @@ RSpec.describe ScraperService, type: :service do
 
       it 'returns error result' do
         result = service.scrape
-        
+
         expect(result[:success]).to be false
         expect(result[:error]).to include('HTTP 404')
         expect(result[:status_code]).to eq(404)
@@ -76,7 +76,7 @@ RSpec.describe ScraperService, type: :service do
 
       it 'handles timeout gracefully' do
         result = service.scrape
-        
+
         expect(result[:success]).to be false
         expect(result[:error]).to eq('Request timeout')
       end
@@ -89,7 +89,7 @@ RSpec.describe ScraperService, type: :service do
 
       it 'handles network errors gracefully' do
         result = service.scrape
-        
+
         expect(result[:success]).to be false
         expect(result[:error]).to include('nodename nor servname provided')
       end
@@ -100,7 +100,7 @@ RSpec.describe ScraperService, type: :service do
     it 'creates instance and calls scrape' do
       url = 'https://example.com/terms'
       stub_request(:get, url).to_return(status: 200, body: '<html><title>Test</title></html>')
-      
+
       result = ScraperService.scrape_url(url)
       expect(result[:success]).to be true
     end
@@ -108,7 +108,7 @@ RSpec.describe ScraperService, type: :service do
 
   describe '.scrape_company_documents' do
     let(:company) { create(:company, :twitter_like) }
-    
+
     before do
       stub_request(:get, company.terms_url)
         .to_return(status: 200, body: '<html><head><title>Terms</title></head><body><h1>Terms of Service</h1></body></html>')
@@ -118,24 +118,24 @@ RSpec.describe ScraperService, type: :service do
 
     it 'scrapes both terms and privacy documents' do
       results = ScraperService.scrape_company_documents(company)
-      
+
       expect(results.length).to eq(2)
-      
+
       terms_result = results.find { |r| r[:document_type] == 'terms' }
       privacy_result = results.find { |r| r[:document_type] == 'privacy' }
-      
+
       expect(terms_result[:success]).to be true
       expect(terms_result[:title]).to eq('Terms')
-      
+
       expect(privacy_result[:success]).to be true
       expect(privacy_result[:title]).to eq('Privacy')
     end
 
     it 'handles company with only terms URL' do
       company.update(privacy_url: nil)
-      
+
       results = ScraperService.scrape_company_documents(company)
-      
+
       expect(results.length).to eq(1)
       expect(results.first[:document_type]).to eq('terms')
     end
@@ -143,11 +143,11 @@ RSpec.describe ScraperService, type: :service do
 
   describe 'content extraction' do
     let(:service) { ScraperService.new('https://example.com') }
-    
+
     it 'removes script and style elements' do
       html = '<html><body><script>bad</script><style>css</style><p>good</p></body></html>'
       stub_request(:get, 'https://example.com').to_return(status: 200, body: html)
-      
+
       result = service.scrape
       expect(result[:text]).not_to include('bad')
       expect(result[:text]).not_to include('css')
@@ -157,7 +157,7 @@ RSpec.describe ScraperService, type: :service do
     it 'extracts title from h1 if no title tag' do
       html = '<html><body><h1>Main Title</h1><p>Content</p></body></html>'
       stub_request(:get, 'https://example.com').to_return(status: 200, body: html)
-      
+
       result = service.scrape
       expect(result[:title]).to eq('Main Title')
     end
@@ -165,7 +165,7 @@ RSpec.describe ScraperService, type: :service do
     it 'prefers title tag over h1' do
       html = '<html><head><title>Page Title</title></head><body><h1>H1 Title</h1></body></html>'
       stub_request(:get, 'https://example.com').to_return(status: 200, body: html)
-      
+
       result = service.scrape
       expect(result[:title]).to eq('Page Title')
     end
@@ -182,7 +182,7 @@ RSpec.describe ScraperService, type: :service do
         </html>
       HTML
       stub_request(:get, 'https://example.com').to_return(status: 200, body: html)
-      
+
       result = service.scrape
       expect(result[:text]).to eq('Text with lots of whitespace')
     end
@@ -192,10 +192,10 @@ RSpec.describe ScraperService, type: :service do
     it 'uses random user agents to avoid detection' do
       service1 = ScraperService.new('https://example.com')
       service2 = ScraperService.new('https://example.com')
-      
+
       headers1 = service1.instance_variable_get(:@headers)
       headers2 = service2.instance_variable_get(:@headers)
-      
+
       # User agents should be from the predefined list
       expect(ScraperService::USER_AGENTS).to include(headers1['User-Agent'])
       expect(ScraperService::USER_AGENTS).to include(headers2['User-Agent'])
@@ -204,13 +204,13 @@ RSpec.describe ScraperService, type: :service do
     it 'respects timeout limits' do
       url = 'https://slow-example.com'
       service = ScraperService.new(url)
-      
+
       # Mock HTTParty to verify timeout is set
       expect(HTTParty).to receive(:get).with(
         url,
         hash_including(timeout: 30)
       ).and_return(double(success?: true, body: '<html></html>', code: 200))
-      
+
       service.scrape
     end
   end

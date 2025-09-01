@@ -18,29 +18,29 @@
 module DocumentsHelper
   def document_type_badge(document)
     case document.document_type
-    when 'terms'
-      content_tag :span, 'Terms of Service', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
-    when 'privacy'
-      content_tag :span, 'Privacy Policy', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
+    when "terms"
+      content_tag :span, "Terms of Service", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+    when "privacy"
+      content_tag :span, "Privacy Policy", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
     else
-      content_tag :span, document.document_type.humanize, class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800'
+      content_tag :span, document.document_type.humanize, class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
     end
   end
 
   def format_checksum(checksum)
-    return 'No checksum' if checksum.blank?
-    
-    content_tag :code, checksum.first(12) + '...', 
-                class: 'bg-gray-100 text-gray-800 text-xs font-mono px-1 py-0.5 rounded',
+    return "No checksum" if checksum.blank?
+
+    content_tag :code, checksum.first(12) + "...",
+                class: "bg-gray-100 text-gray-800 text-xs font-mono px-1 py-0.5 rounded",
                 title: checksum
   end
 
   def time_ago_with_tooltip(time)
-    return 'Unknown' if time.blank?
-    
-    content_tag :span, time_ago_in_words(time) + ' ago',
-                title: time.strftime('%B %d, %Y at %I:%M %p %Z'),
-                class: 'cursor-help'
+    return "Unknown" if time.blank?
+
+    content_tag :span, time_ago_in_words(time) + " ago",
+                title: time.strftime("%B %d, %Y at %I:%M %p %Z"),
+                class: "cursor-help"
   end
 
   def archive_count_text(document)

@@ -18,15 +18,15 @@
 module CompaniesHelper
   def company_status_badge(company)
     if company.terms_url.present?
-      content_tag :span, 'Active', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800'
+      content_tag :span, "Active", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
     else
-      content_tag :span, 'Inactive', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800'
+      content_tag :span, "Inactive", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
     end
   end
 
   def format_domain_link(domain)
-    url = domain.start_with?('http') ? domain : "https://#{domain}"
-    link_to domain, url, target: '_blank', rel: 'noopener noreferrer', class: 'text-blue-600 hover:text-blue-800 underline'
+    url = domain.start_with?("http") ? domain : "https://#{domain}"
+    link_to domain, url, target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:text-blue-800 underline"
   end
 
   def document_count_text(company)

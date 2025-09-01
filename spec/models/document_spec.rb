@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Document, type: :model do
   describe 'validations' do
     let(:company) { create(:company) }
-    
+
     it 'is valid with valid attributes' do
       document = build(:document, company: company)
       expect(document).to be_valid
@@ -71,19 +71,19 @@ RSpec.describe Document, type: :model do
     it 'destroys associated archives when document is deleted' do
       document = create(:document)
       archive = create(:archive, document: document)
-      
+
       expect { document.destroy }.to change(Archive, :count).by(-1)
     end
   end
 
   describe 'scopes' do
     let(:company) { create(:company) }
-    
+
     describe '.recent' do
       it 'orders documents by archived_at descending' do
         old_document = create(:document, company: company, archived_at: 2.days.ago)
         new_document = create(:document, company: company, archived_at: 1.day.ago)
-        
+
         expect(Document.recent.first).to eq(new_document)
         expect(Document.recent.last).to eq(old_document)
       end
@@ -95,7 +95,7 @@ RSpec.describe Document, type: :model do
         company2 = create(:company)
         doc1 = create(:document, company: company1)
         doc2 = create(:document, company: company2)
-        
+
         expect(Document.by_company(company1)).to include(doc1)
         expect(Document.by_company(company1)).not_to include(doc2)
       end
@@ -108,7 +108,7 @@ RSpec.describe Document, type: :model do
         document = create(:document)
         old_archive = create(:archive, document: document, version: 1)
         new_archive = create(:archive, document: document, version: 2)
-        
+
         expect(document.latest_archive).to eq(new_archive)
       end
 
@@ -122,10 +122,10 @@ RSpec.describe Document, type: :model do
       it 'returns archive count plus one' do
         document = create(:document)
         expect(document.current_version).to eq(1)
-        
+
         create(:archive, document: document)
         expect(document.current_version).to eq(2)
-        
+
         create(:archive, document: document)
         expect(document.current_version).to eq(3)
       end

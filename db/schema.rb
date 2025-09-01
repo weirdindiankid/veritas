@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_09_01_175625) do
+ActiveRecord::Schema[7.2].define(version: 2025_09_01_193442) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,6 +23,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_01_175625) do
     t.string "archived_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["checksum"], name: "index_archives_on_checksum"
+    t.index ["created_at"], name: "index_archives_on_created_at"
+    t.index ["document_id", "version"], name: "index_archives_on_document_id_and_version", unique: true
     t.index ["document_id"], name: "index_archives_on_document_id"
     t.index ["previous_archive_id"], name: "index_archives_on_previous_archive_id"
   end
@@ -35,6 +38,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_01_175625) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["domain"], name: "index_companies_on_domain", unique: true
+    t.index ["name"], name: "index_companies_on_name"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -47,7 +52,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_01_175625) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "document_type"
+    t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["company_id"], name: "index_documents_on_company_id"
+    t.index ["document_type"], name: "index_documents_on_document_type"
+    t.index ["ipfs_hash"], name: "index_documents_on_ipfs_hash"
+    t.index ["url"], name: "index_documents_on_url"
   end
 
   add_foreign_key "archives", "archives", column: "previous_archive_id"

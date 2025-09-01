@@ -16,7 +16,7 @@ RSpec.describe "home/index.html.erb", type: :view do
 
   it 'shows statistics cards' do
     expect(rendered).to include('42')
-    expect(rendered).to include('156') 
+    expect(rendered).to include('156')
     expect(rendered).to include('89')
   end
 
