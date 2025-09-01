@@ -26,13 +26,13 @@ class DocumentArchiverService
     
     # Archive Terms of Service
     if @company.terms_url.present?
-      result = archive_document(@company.terms_url, 'Terms of Service')
+      result = archive_document(@company.terms_url, 'terms')
       results << result
     end
     
     # Archive Privacy Policy  
     if @company.privacy_url.present?
-      result = archive_document(@company.privacy_url, 'Privacy Policy')
+      result = archive_document(@company.privacy_url, 'privacy')
       results << result
     end
     
@@ -68,12 +68,22 @@ class DocumentArchiverService
         return { success: false, error: error_msg, document_type: document_type }
       end
       
-      # Create document record
+      # Create document record  
+      title = case document_type
+              when 'terms'
+                "#{@company.name} Terms of Service"
+              when 'privacy'
+                "#{@company.name} Privacy Policy"
+              else
+                "#{@company.name} Document"
+              end
+
       document = @company.documents.build(
         url: url,
-        title: "#{@company.name} #{document_type}",
+        title: title,
         content: scrape_result[:text],
         ipfs_hash: ipfs_result[:hash],
+        document_type: document_type,
         archived_at: Time.current
       )
       

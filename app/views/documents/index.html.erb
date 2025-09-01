@@ -1,2 +1,158 @@
-<h1>Documents#index</h1>
-<p>Find me in app/views/documents/index.html.erb</p>
+<% content_for :title, "Archived Documents" %>
+
+<!-- Header Section -->
+<div class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-8">
+      <!-- Breadcrumb -->
+      <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-4">
+          <li>
+            <div>
+              <%= link_to root_path, class: "text-gray-400 hover:text-gray-500" do %>
+                <svg class="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                <span class="sr-only">Home</span>
+              <% end %>
+            </div>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span class="ml-4 text-sm font-medium text-gray-500">Documents</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="md:flex md:items-center md:justify-between">
+        <div class="flex-1 min-w-0">
+          <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            Archived Documents
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">
+            <% if @documents.any? %>
+              <%= pluralize(@documents.count, 'document') %> with cryptographic verification and immutable storage
+            <% else %>
+              No documents archived yet
+            <% end %>
+          </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+          <%= link_to companies_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Browse Companies
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <% if @documents.any? %>
+    <!-- Filter Options -->
+    <div class="mb-8">
+      <div class="sm:hidden">
+        <label for="tabs" class="sr-only">Select a tab</label>
+        <select id="tabs" name="tabs" class="block w-full focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+          <option>All Documents</option>
+          <option>Terms of Service</option>
+          <option>Privacy Policies</option>
+        </select>
+      </div>
+      <div class="hidden sm:block">
+        <nav class="flex space-x-8" aria-label="Tabs">
+          <a href="#" class="border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" aria-current="page">
+            All Documents
+          </a>
+          <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+            Terms of Service
+          </a>
+          <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+            Privacy Policies
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% @documents.includes(:company, :archives).order(archived_at: :desc).each do |document| %>
+          <li>
+            <%= link_to document_path(document), class: "block hover:bg-gray-50 transition duration-200" do %>
+              <div class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex-shrink-0">
+                      <%= document_type_badge(document) %>
+                    </div>
+                    <div class="ml-4 flex-1 min-w-0">
+                      <div class="flex items-center">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                          <%= document.title %>
+                        </p>
+                        <p class="ml-2 flex-shrink-0 text-sm text-gray-500">
+                          · <%= document.company.name %>
+                        </p>
+                      </div>
+                      <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span class="truncate"><%= document.url %></span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="ml-4 flex-shrink-0 flex flex-col items-end space-y-2">
+                    <div class="text-sm text-gray-500">
+                      <%= time_ago_with_tooltip(document.archived_at) %>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <div class="text-xs text-gray-500">
+                        <%= format_checksum(document.ipfs_hash) %>
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        <%= archive_count_text(document) %>
+                      </div>
+                      <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- Pagination would go here if needed -->
+    
+  <% else %>
+    <!-- Empty State -->
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No documents archived</h3>
+      <p class="mt-1 text-sm text-gray-500">Start by adding companies to archive their terms of service and privacy policies.</p>
+      <div class="mt-6">
+        <%= link_to new_company_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" do %>
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add First Company
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

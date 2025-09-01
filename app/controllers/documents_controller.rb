@@ -17,8 +17,13 @@
 
 class DocumentsController < ApplicationController
   def index
+    @documents = Document.includes(:company, :archives).order(archived_at: :desc)
+    @documents = @documents.where(company_id: params[:company_id]) if params[:company_id].present?
   end
 
   def show
+    @document = Document.find(params[:id])
+    @company = @document.company
+    @archives = @document.archives.order(version: :desc)
   end
 end
