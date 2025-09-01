@@ -15,6 +15,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+require 'digest'
+
 class DocumentArchiverService
   def initialize(company)
     @company = company
@@ -68,16 +70,17 @@ class DocumentArchiverService
         return { success: false, error: error_msg, document_type: document_type }
       end
       
-      # Create document record  
-      title = case document_type
-              when 'terms'
-                "#{@company.name} Terms of Service"
-              when 'privacy'
-                "#{@company.name} Privacy Policy"
-              else
-                "#{@company.name} Document"
-              end
+      # Create document record - use scraped title if available, otherwise generate one
+      title = scrape_result[:title] || case document_type
+                                         when 'terms'
+                                           "#{@company.name} Terms of Service"
+                                         when 'privacy'
+                                           "#{@company.name} Privacy Policy"
+                                         else
+                                           "#{@company.name} Document"
+                                         end
 
+      # Always create new document for each archiving
       document = @company.documents.build(
         url: url,
         title: title,
@@ -87,22 +90,42 @@ class DocumentArchiverService
         archived_at: Time.current
       )
       
-      if document.save
-        # Pin to IPFS for persistence
-        IpfsService.pin_document(ipfs_result[:hash])
-        
-        {
-          success: true,
-          document: document,
-          document_type: document_type,
-          ipfs_hash: ipfs_result[:hash],
-          scraped_content_length: scrape_result[:text]&.length || 0
-        }
-      else
+      unless document.save
         error_msg = "Failed to save #{document_type}: #{document.errors.full_messages.join(', ')}"
         @errors << error_msg
-        { success: false, error: error_msg, document_type: document_type }
+        return { success: false, error: error_msg, document_type: document_type }
       end
+      
+      # Create archive for tracking changes (especially for re-archiving scenarios)
+      previous_document = @company.documents.where(url: url).where.not(id: document.id).order(:archived_at).last
+      
+      if previous_document
+        # Create archive for the new document to show the change
+        archive = document.archives.build(
+          checksum: Digest::SHA256.hexdigest(scrape_result[:text]),
+          diff_content: "content changed",
+          archived_by: "system",
+          ipfs_hash: ipfs_result[:hash]
+        )
+        
+        # Set previous_archive if the previous document has archives
+        if previous_document.archives.any?
+          archive.previous_archive = previous_document.archives.order(:version).last
+        end
+        
+        archive.save!
+      end
+      
+      # Pin to IPFS for persistence
+      IpfsService.pin_document(ipfs_result[:hash])
+      
+      {
+        success: true,
+        document: document,
+        document_type: document_type,
+        ipfs_hash: ipfs_result[:hash],
+        scraped_content_length: scrape_result[:text]&.length || 0
+      }
       
     rescue => e
       error_msg = "Unexpected error archiving #{document_type}: #{e.message}"

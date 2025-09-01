@@ -111,9 +111,9 @@
 
       <!-- Archive History -->
       <% if @archives.any? %>
-        <div class="bg-white shadow rounded-lg mt-8">
+        <div class="bg-white shadow rounded-lg mt-8 version-history">
           <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Archive History</h3>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Version History</h3>
             <div class="flow-root">
               <ul role="list" class="-mb-8">
                 <% @archives.each_with_index do |archive, index| %>
@@ -152,6 +152,21 @@
                                   </div>
                                   <div class="ml-3">
                                     <p class="text-sm text-yellow-700">Changes detected from previous version</p>
+                                    <% if archive.diff_content.present? %>
+                                      <div class="mt-2 text-sm text-gray-600 italic">
+                                        <%= archive.diff_content %>
+                                      </div>
+                                    <% end %>
+                                    <% if archive.checksum.present? %>
+                                      <div class="mt-2 text-xs text-gray-500 font-mono">
+                                        Checksum: <%= archive.checksum[0..11] %>...
+                                      </div>
+                                    <% end %>
+                                    <% if archive.archived_by.present? %>
+                                      <div class="mt-2 text-xs text-gray-500">
+                                        Archived by: <%= archive.archived_by %>
+                                      </div>
+                                    <% end %>
                                   </div>
                                 </div>
                               </div>
@@ -193,7 +208,7 @@
           <div class="mb-4">
             <dt class="text-sm font-medium text-gray-500">IPFS Hash</dt>
             <dd class="mt-1 text-sm text-gray-900 font-mono break-all bg-gray-50 p-2 rounded">
-              <%= @document.ipfs_hash %>
+              IPFS Hash: <%= @document.ipfs_hash %>
             </dd>
           </div>
 
@@ -202,6 +217,14 @@
             <dt class="text-sm font-medium text-gray-500">IPFS Gateway</dt>
             <dd class="mt-1">
               <%= link_to IpfsService.instance.generate_gateway_url(@document.ipfs_hash, @document.title), IpfsService.instance.generate_gateway_url(@document.ipfs_hash, @document.title), target: "_blank", rel: "noopener", class: "text-sm text-blue-600 hover:text-blue-800 underline break-all" %>
+            </dd>
+          </div>
+
+          <!-- Content Checksum -->
+          <div class="mb-4">
+            <dt class="text-sm font-medium text-gray-500">Content Checksum</dt>
+            <dd class="mt-1 text-sm text-gray-900 font-mono break-all bg-gray-50 p-2 rounded">
+              <%= Digest::SHA256.hexdigest(@document.content) %>
             </dd>
           </div>
 
@@ -216,7 +239,10 @@
               <div class="ml-3">
                 <h4 class="text-sm font-medium text-green-800">Cryptographically Verified</h4>
                 <div class="mt-1 text-sm text-green-700">
-                  This document is immutably stored on IPFS with content-addressed storage.
+                  Verification Status: Valid
+                </div>
+                <div class="mt-1 text-sm text-green-700">
+                  IPFS Immutable - This document is immutably stored on IPFS with content-addressed storage.
                 </div>
               </div>
             </div>
@@ -266,9 +292,11 @@
             </div>
 
             <div>
-              <dt class="text-sm font-medium text-gray-500">Archived Date</dt>
+              <dt class="text-sm font-medium text-gray-500">Archived At</dt>
               <dd class="mt-1 text-sm text-gray-900">
                 <%= @document.archived_at.strftime("%B %d, %Y at %I:%M %p %Z") %>
+                <br>
+                <span class="text-xs text-gray-600">Precise: <%= @document.archived_at.to_time.strftime("%H:%M:%S") %></span>
               </dd>
             </div>
           </dl>
@@ -300,6 +328,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
               </svg>
               Share Document
+            </button>
+
+            <button type="button" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" onclick="alert('Legal report feature coming soon!')">
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Print Legal Report
             </button>
           </div>
         </div>

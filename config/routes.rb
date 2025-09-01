@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   root "home#index"
   
   resources :companies do
+    member do
+      patch :rearchive
+    end
     resources :documents, only: [:index, :show]
   end
   
