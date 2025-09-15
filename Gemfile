@@ -23,7 +23,7 @@ gem "redis", ">= 4.0.1"
 gem "ipfs-http-client-rb", "~> 0.0.2"
 
 # Web scraping
-gem "nokogiri", "~> 1.15"
+gem "nokogiri", "~> 1.18"
 gem "httparty", "~> 0.21"
 
 # Background jobs
