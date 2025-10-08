@@ -27,7 +27,7 @@ gem "nokogiri", "~> 1.15"
 gem "httparty", "~> 0.21"
 
 # Background jobs
-gem "sidekiq", "~> 7.1"
+gem "sidekiq", "~> 8.0"
 
 # Diff utilities
 gem "diffy", "~> 3.4"
